@@ -13,14 +13,14 @@ function reducer(state, action) {
     return {
       ...state,
       constraints:
-        state.constraints.facingMode === "user"
+        state.constraints.video === "user"
           ? {
               ...state.constraints,
-              facingMode: "environment",
+              video: "environment",
             }
           : {
               ...state.constraints,
-              facingMode: "user",
+              video: "user",
             },
     };
   } else if (action.type === "ADD_STREAM") {
@@ -47,7 +47,7 @@ function App() {
       audio: false,
       video: "user",
     },
-    startCamera: false,
+    startCamera: true,
     stream: null,
   });
 
@@ -80,7 +80,9 @@ function App() {
           dispatch({ type: "REMOVE_STREAM" });
         }
       });
-  }, [options.constraints.facingMode, options.startCamera]);
+  }, [options.constraints, options.startCamera]);
+
+  console.log(options);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
