@@ -34,7 +34,7 @@ function App() {
   const [loadingCapture, setLoadingCapture] = useState(false);
 
   const [options, dispatch] = useReducer(reducer, {
-    facingMode: "user",
+    facingMode: "environment",
     startCamera: false,
     stream: null,
   });
@@ -55,6 +55,8 @@ function App() {
       audio: false,
       video: options.facingMode,
     };
+
+    console.log("constraints", constraints);
 
     navigator.mediaDevices
       .getUserMedia(constraints)
