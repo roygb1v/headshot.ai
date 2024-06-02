@@ -10,18 +10,22 @@ function reducer(state, action) {
       startCamera: !state.startCamera,
     };
   } else if (action.type === "TOGGLE_FACING_MODE") {
-    if (state.constraints.video === "user") {
+    if (state.constraints.video.facingMode === "user") {
       return {
         ...state,
         constraints: {
-          video: "environment",
+          video: {
+            facingMode: "environment",
+          },
         },
       };
     } else {
       return {
         ...state,
         constraints: {
-          video: "environment",
+          video: {
+            facingMode: "user",
+          },
         },
       };
     }
@@ -59,8 +63,9 @@ function App() {
 
   const [options, dispatch] = useReducer(reducer, {
     constraints: {
-      audio: false,
-      video: "user",
+      video: {
+        facingMode: "user",
+      },
     },
     startCamera: true,
     stream: null,
