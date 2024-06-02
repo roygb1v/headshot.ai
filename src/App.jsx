@@ -80,7 +80,7 @@ function App() {
           dispatch({ type: "REMOVE_STREAM" });
         }
       });
-  }, [options.constraints, options.startCamera]);
+  }, [options.constraints.facingMode, options.startCamera]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
