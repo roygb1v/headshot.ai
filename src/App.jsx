@@ -10,19 +10,34 @@ function reducer(state, action) {
       startCamera: !state.startCamera,
     };
   } else if (action.type === "TOGGLE_FACING_MODE") {
-    return {
-      ...state,
-      constraints:
-        state.constraints.video === "user"
-          ? {
-              ...state.constraints,
-              video: "environment",
-            }
-          : {
-              ...state.constraints,
-              video: "user",
-            },
-    };
+    if (state.constraints.video === "user") {
+      return {
+        ...state,
+        constraints: {
+          video: "environment",
+        },
+      };
+    } else {
+      return {
+        ...state,
+        constraints: {
+          video: "environment",
+        },
+      };
+    }
+    // return {
+    //   ...state,
+    //   constraints:
+    //     state.constraints.video === "user"
+    //       ? {
+    //           ...state.constraints,
+    //           video: "environment",
+    //         }
+    //       : {
+    //           ...state.constraints,
+    //           video: "user",
+    //         },
+    // };
   } else if (action.type === "ADD_STREAM") {
     return {
       ...state,
