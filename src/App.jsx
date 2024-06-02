@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useReducer } from "react";
-// import reactLogo from "./assets/react.svg";
-// import viteLogo from "/vite.svg";
+import { IconRotateClockwise, IconChevronLeft } from "@tabler/icons-react";
+import { MantineProvider, ActionIcon } from "@mantine/core";
+
+import "@mantine/core/styles.css";
 import "./App.css";
 
 function reducer(state, action) {
@@ -29,19 +31,6 @@ function reducer(state, action) {
         },
       };
     }
-    // return {
-    //   ...state,
-    //   constraints:
-    //     state.constraints.video === "user"
-    //       ? {
-    //           ...state.constraints,
-    //           video: "environment",
-    //         }
-    //       : {
-    //           ...state.constraints,
-    //           video: "user",
-    //         },
-    // };
   } else if (action.type === "ADD_STREAM") {
     return {
       ...state,
@@ -56,10 +45,12 @@ function reducer(state, action) {
   throw Error("Unknown action!");
 }
 
-function App() {
+function VideoComponent() {
   const videoRef = useRef(null);
 
   const [loadingCapture, setLoadingCapture] = useState(false);
+  const [imageURL, setImageURL] = useState("");
+  const [showImageCapture, setShowImageCapture] = useState(false);
 
   const [options, dispatch] = useReducer(reducer, {
     constraints: {
@@ -77,8 +68,6 @@ function App() {
 
   useEffect(() => {
     const video = videoRef.current;
-    video.style.width = "400px";
-    video.style.height = "400px";
     video.setAttribute("autoplay", "");
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
@@ -102,28 +91,60 @@ function App() {
       });
   }, [options.constraints, options.startCamera]);
 
-  console.log(options);
-
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <video
-        style={{ width: 400, height: 340, background: "#e4e4e7" }}
-        ref={videoRef}
-        onClick={handleCameraChange}
-      />
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        justifyContent: "space-between",
+      }}
+    >
+      {showImageCapture && (
+        <ActionIcon
+          variant="transparent"
+          size="sm"
+          color="rgba(255, 255, 255, 1)"
+          aria-label="back"
+          onClick={() => setShowImageCapture(false)}
+        >
+          <IconChevronLeft />
+        </ActionIcon>
+      )}
+      {!showImageCapture && (
+        <video
+          style={{ width: 364, height: 364, background: "#000000" }}
+          ref={videoRef}
+          onClick={handleCameraChange}
+        />
+      )}
+      {showImageCapture && imageURL.length && (
+        <img
+          src={imageURL}
+          style={{ width: 364, height: 364, objectFit: "cover" }}
+        />
+      )}
       <div
         style={{
           display: "flex",
-          gap: 8,
-          paddingTop: 16,
         }}
       >
-        <button
-          style={{ background: "maroon" }}
-          onClick={() => dispatch({ type: "TOGGLE_CAMERA" })}
+        <ActionIcon
+          style={{ width: 80, height: 80 }}
+          variant="outline"
+          size="xl"
+          color="rgba(255, 255, 255, 1)"
+          aria-label="toggle"
+          onClick={() => setShowImageCapture(true)}
         >
-          {options.startCamera ? "Stop" : "Start"}
-        </button>
+          {imageURL.length ? (
+            <img
+              src={imageURL}
+              style={{ width: 80, height: 80, objectFit: "cover" }}
+            />
+          ) : null}
+        </ActionIcon>
+
         <button
           disabled={loadingCapture}
           onClick={async () => {
@@ -134,27 +155,43 @@ function App() {
             const blob = await imageCapture.takePhoto();
 
             const url = URL.createObjectURL(blob);
+            setImageURL(url);
 
-            const imageWindow = open(url);
+            // const imageWindow = open(url);
 
-            imageWindow.addEventListener("beforeunload", () =>
-              URL.revokeObjectURL(url)
-            );
+            // imageWindow.addEventListener("beforeunload", () =>
+            //   URL.revokeObjectURL(url)
+            // );
             setLoadingCapture(false);
           }}
           style={{
             width: 80,
             height: 80,
             background: "#FFF",
+            border: "2px solid black",
             borderRadius: "100%",
             margin: "auto",
           }}
         />
-        <button onClick={() => dispatch({ type: "TOGGLE_FACING_MODE" })}>
-          Switch
-        </button>
+        <ActionIcon
+          style={{ width: 80, height: 80 }}
+          variant="outline"
+          color="rgba(255, 255, 255, 1)"
+          aria-label="rotate"
+          onClick={() => dispatch({ type: "TOGGLE_FACING_MODE" })}
+        >
+          <IconRotateClockwise />
+        </ActionIcon>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <MantineProvider>
+      <VideoComponent />
+    </MantineProvider>
   );
 }
 
