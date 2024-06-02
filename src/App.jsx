@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useReducer } from "react";
+import { useRef, useEffect, useReducer } from "react";
 import { IconRotateClockwise, IconChevronLeft } from "@tabler/icons-react";
 import { MantineProvider, ActionIcon } from "@mantine/core";
 
@@ -6,12 +6,7 @@ import "@mantine/core/styles.css";
 import "./App.css";
 
 function reducer(state, action) {
-  if (action.type === "TOGGLE_CAMERA") {
-    return {
-      ...state,
-      startCamera: !state.startCamera,
-    };
-  } else if (action.type === "TOGGLE_FACING_MODE") {
+  if (action.type === "TOGGLE_FACING_MODE") {
     if (state.constraints.video.facingMode === "user") {
       return {
         ...state,
@@ -45,12 +40,44 @@ function reducer(state, action) {
   throw Error("Unknown action!");
 }
 
+function imageReducer(state, action) {
+  if (action.type === "LOADING_TRUE") {
+    return {
+      ...state,
+      loading: true,
+    };
+  } else if (action.type === "LOADING_FALSE") {
+    return {
+      ...state,
+      loading: false,
+    };
+  } else if (action.type === "SET_URL") {
+    return {
+      ...state,
+      url: action.url,
+    };
+  } else if (action.type === "SHOW_IMAGE") {
+    return {
+      ...state,
+      shouldShow: true,
+    };
+  } else if (action.type === "NO_SHOW_IMAGE") {
+    return {
+      ...state,
+      shouldShow: false,
+    };
+  }
+  throw Error("Unknown action!");
+}
+
 function VideoComponent() {
   const videoRef = useRef(null);
 
-  const [loadingCapture, setLoadingCapture] = useState(false);
-  const [imageURL, setImageURL] = useState("");
-  const [showImageCapture, setShowImageCapture] = useState(false);
+  const [imageOptions, dispatchImage] = useReducer(imageReducer, {
+    loading: false,
+    shouldShow: false,
+    url: "",
+  });
 
   const [options, dispatch] = useReducer(reducer, {
     constraints: {
@@ -97,30 +124,34 @@ function VideoComponent() {
         display: "flex",
         flexDirection: "column",
         height: "100vh",
-        justifyContent: "space-between",
+        justifyContent: "space-evenly",
       }}
     >
-      {showImageCapture && (
+      {imageOptions.shouldShow && (
         <ActionIcon
           variant="transparent"
           size="sm"
           color="rgba(255, 255, 255, 1)"
           aria-label="back"
-          onClick={() => setShowImageCapture(false)}
+          onClick={() => dispatchImage({ type: "NO_SHOW_IMAGE" })}
         >
           <IconChevronLeft />
         </ActionIcon>
       )}
-      {!showImageCapture && (
+      {!imageOptions.shouldShow && (
         <video
-          style={{ width: 364, height: 364, background: "#000000" }}
+          style={{
+            width: 364,
+            height: 364,
+            background: "#000000",
+          }}
           ref={videoRef}
           onClick={handleCameraChange}
         />
       )}
-      {showImageCapture && imageURL.length && (
+      {imageOptions.shouldShow && imageOptions.url.length && (
         <img
-          src={imageURL}
+          src={imageOptions.url}
           style={{ width: 364, height: 364, objectFit: "cover" }}
         />
       )}
@@ -135,34 +166,31 @@ function VideoComponent() {
           size="xl"
           color="rgba(255, 255, 255, 1)"
           aria-label="toggle"
-          onClick={() => setShowImageCapture(true)}
+          onClick={() => {
+            dispatchImage({ type: "SHOW_IMAGE" });
+          }}
         >
-          {imageURL.length ? (
+          {imageOptions.url.length ? (
             <img
-              src={imageURL}
+              src={imageOptions.url}
               style={{ width: 80, height: 80, objectFit: "cover" }}
             />
           ) : null}
         </ActionIcon>
 
         <button
-          disabled={loadingCapture}
+          disabled={imageOptions.loading}
           onClick={async () => {
-            setLoadingCapture(true);
+            dispatchImage({ type: "LOADING_TRUE" });
             const imageCapture = new ImageCapture(
               options.stream.getVideoTracks()[0]
             );
             const blob = await imageCapture.takePhoto();
 
             const url = URL.createObjectURL(blob);
-            setImageURL(url);
 
-            // const imageWindow = open(url);
-
-            // imageWindow.addEventListener("beforeunload", () =>
-            //   URL.revokeObjectURL(url)
-            // );
-            setLoadingCapture(false);
+            dispatchImage({ type: "SET_URL", url: url });
+            dispatchImage({ type: "LOADING_FALSE" });
           }}
           style={{
             width: 80,
