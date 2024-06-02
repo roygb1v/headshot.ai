@@ -1,6 +1,6 @@
 import { useRef, useEffect, useReducer } from "react";
 import { IconRotateClockwise, IconChevronLeft } from "@tabler/icons-react";
-import { MantineProvider, ActionIcon } from "@mantine/core";
+import { MantineProvider, ActionIcon, Button } from "@mantine/core";
 
 import "@mantine/core/styles.css";
 import "./App.css";
@@ -158,6 +158,7 @@ function VideoComponent() {
       <div
         style={{
           display: "flex",
+          justifyContent: "space-between",
         }}
       >
         <ActionIcon
@@ -178,7 +179,7 @@ function VideoComponent() {
           ) : null}
         </ActionIcon>
 
-        <button
+        <Button
           disabled={imageOptions.loading}
           onClick={async () => {
             dispatchImage({ type: "LOADING_TRUE" });
@@ -192,15 +193,18 @@ function VideoComponent() {
             dispatchImage({ type: "SET_URL", url: url });
             dispatchImage({ type: "LOADING_FALSE" });
           }}
-          style={{
-            width: 80,
-            height: 80,
-            background: "#FFF",
-            border: "2px solid black",
-            borderRadius: "100%",
-            margin: "auto",
-          }}
-        />
+          style={
+            {
+              // width: 80,
+              // height: 80,
+              // background: "#FFF",
+              // borderRadius: "100%",
+              // margin: "auto",
+            }
+          }
+        >
+          Take
+        </Button>
         <ActionIcon
           style={{ width: 80, height: 80 }}
           variant="outline"
