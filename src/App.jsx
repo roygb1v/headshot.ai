@@ -12,7 +12,16 @@ function reducer(state, action) {
   } else if (action.type === "TOGGLE_FACING_MODE") {
     return {
       ...state,
-      facingMode: state.facingMode === "user" ? "environment" : "user",
+      constraints:
+        state.constraints.facingMode === "user"
+          ? {
+              ...state.constraints,
+              facingMode: "environment",
+            }
+          : {
+              ...state.constraints,
+              facingMode: "user",
+            },
     };
   } else if (action.type === "ADD_STREAM") {
     return {
@@ -34,7 +43,10 @@ function App() {
   const [loadingCapture, setLoadingCapture] = useState(false);
 
   const [options, dispatch] = useReducer(reducer, {
-    facingMode: "environment",
+    constraints: {
+      audio: false,
+      video: "user",
+    },
     startCamera: false,
     stream: null,
   });
@@ -51,15 +63,8 @@ function App() {
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
 
-    const constraints = {
-      audio: false,
-      video: options.facingMode,
-    };
-
-    console.log("constraints", constraints);
-
     navigator.mediaDevices
-      .getUserMedia(constraints)
+      .getUserMedia(options.constraints)
       .then(function success(stream) {
         if (options.startCamera) {
           video.srcObject = stream;
@@ -75,7 +80,7 @@ function App() {
           dispatch({ type: "REMOVE_STREAM" });
         }
       });
-  }, [options.facingMode, options.startCamera]);
+  }, [options.constraints, options.startCamera]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
