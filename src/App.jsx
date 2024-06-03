@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useReducer } from "react";
+import { useRef, useState, useLayoutEffect, useReducer } from "react";
 import { IconRotateClockwise, IconChevronLeft } from "@tabler/icons-react";
 import { MantineProvider, ActionIcon, Button } from "@mantine/core";
 
@@ -36,26 +36,6 @@ function reducer(state, action) {
       ...state,
       stream: null,
     };
-  }
-  throw Error("Unknown action!");
-}
-
-function imageReducer(state, action) {
-  if (action.type === "LOADING_TRUE") {
-    return {
-      ...state,
-      loading: true,
-    };
-  } else if (action.type === "LOADING_FALSE") {
-    return {
-      ...state,
-      loading: false,
-    };
-  } else if (action.type === "SET_URL") {
-    return {
-      ...state,
-      url: action.url,
-    };
   } else if (action.type === "SHOW_IMAGE") {
     return {
       ...state,
@@ -74,11 +54,7 @@ function VideoComponent() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const [imageOptions, dispatchImage] = useReducer(imageReducer, {
-    loading: false,
-    shouldShow: false,
-    url: "",
-  });
+  const [src, setSrc] = useState("");
 
   const [options, dispatch] = useReducer(reducer, {
     constraints: {
@@ -86,7 +62,7 @@ function VideoComponent() {
         facingMode: "user",
       },
     },
-    startCamera: true,
+    shouldShow: false,
     stream: null,
   });
 
@@ -99,11 +75,14 @@ function VideoComponent() {
     video.setAttribute("autoplay", "");
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
+    console.log(window.innerHeight, window.innerWidth);
+    video.style.height = window.innerHeight / 2 + "px";
+    video.style.width = window.innerWidth / 2 + "px";
 
     navigator.mediaDevices
       .getUserMedia(options.constraints)
       .then(function success(stream) {
-        if (options.startCamera) {
+        if (!options.shouldShow) {
           video.srcObject = stream;
           dispatch({ type: "ADD_STREAM", stream: stream });
         } else {
@@ -117,7 +96,7 @@ function VideoComponent() {
           dispatch({ type: "REMOVE_STREAM" });
         }
       });
-  }, [options.constraints, options.startCamera]);
+  }, [options.constraints, options.shouldShow]);
 
   return (
     <div
@@ -127,42 +106,43 @@ function VideoComponent() {
         justifyContent: "space-evenly",
       }}
     >
-      {imageOptions.shouldShow && (
+      {options.shouldShow && (
         <ActionIcon
           variant="transparent"
           size="sm"
           color="rgba(255, 255, 255, 1)"
           aria-label="back"
           onClick={() => {
-            dispatchImage({ type: "NO_SHOW_IMAGE" });
+            dispatch({ type: "NO_SHOW_IMAGE" });
           }}
         >
           <IconChevronLeft />
         </ActionIcon>
       )}
-      {!imageOptions.shouldShow && (
+      {!options.shouldShow && (
         <video
-          style={{
-            width: 364,
-            height: 364,
-            background: "#000000",
-          }}
           ref={videoRef}
+          style={{ background: "lightgray" }}
           onClick={handleCameraChange}
         />
       )}
       <canvas
         style={{
-          display: imageOptions.shouldShow ? "block" : "none",
-          // width: imageOptions.shouldShow ? 364 : 0,
-          // height: imageOptions.shouldShow ? 364 : 0,
+          position: "absolute",
+          display: "none",
+          // width: 640,
+          // height: 480, cannot set here
         }}
+        width="640"
+        height="480"
         ref={canvasRef}
       ></canvas>
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
+          width: window.innerWidth / 2,
+          margin: "auto",
         }}
       >
         <ActionIcon
@@ -172,33 +152,32 @@ function VideoComponent() {
           color="rgba(255, 255, 255, 1)"
           aria-label="toggle"
           onClick={() => {
-            dispatchImage({ type: "SHOW_IMAGE" });
+            // dispatch({ type: "SHOW_IMAGE" });
           }}
         >
-          {imageOptions.url.length ? (
+          {src.length ? (
             <img
-              src={imageOptions.url}
-              style={{ width: 80, height: 80, objectFit: "cover" }}
+              src={src}
+              style={{ height: 80, width: 80, objectFit: "cover" }}
             />
           ) : null}
         </ActionIcon>
 
         <Button
-          disabled={imageOptions.loading}
+          disabled={options.loading}
           onClick={async () => {
-            // dispatchImage({ type: "LOADING_TRUE" });
-
             const { videoWidth, videoHeight } = videoRef.current;
+            console.log(videoWidth, videoHeight);
 
             const context = canvasRef.current.getContext("2d");
-            // canvasRef.current.style.imagesRatio = 9 / 16;
-            canvasRef.current.style.minWidth = videoWidth;
-            canvasRef.current.style.minHeight = videoHeight;
+            context.drawImage(videoRef.current, 0, 0, videoWidth, videoHeight);
 
-            context.drawImage(videoRef.current, 0, 0, 364, 364);
+            const data = canvasRef.current.toDataURL("image/png");
+            console.log(data);
 
-            dispatchImage({ type: "SHOW_IMAGE" });
-            // dispatchImage({ type: "LOADING_FALSE" });
+            setSrc(data);
+
+            dispatch({ type: "NO_SHOW_IMAGE" });
           }}
           style={{
             width: 80,
