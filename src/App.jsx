@@ -76,8 +76,8 @@ function VideoComponent() {
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
     console.log(window.innerHeight, window.innerWidth);
-    video.style.height = window.innerHeight / 2 + "px";
-    video.style.width = window.innerWidth / 2 + "px";
+    video.style.height = (window.innerHeight * 2) / 3 + "px";
+    video.style.width = (window.innerWidth * 2) / 3 + "px";
 
     navigator.mediaDevices
       .getUserMedia(options.constraints)
@@ -141,7 +141,7 @@ function VideoComponent() {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          width: window.innerWidth / 2,
+          width: (window.innerWidth * 2) / 3,
           margin: "auto",
         }}
       >
