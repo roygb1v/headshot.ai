@@ -182,7 +182,7 @@ function VideoComponent() {
         <Button
           disabled={imageOptions.loading}
           onClick={async () => {
-            dispatchImage({ type: "LOADING_TRUE" });
+            // dispatchImage({ type: "LOADING_TRUE" });
             const imageCapture = new ImageCapture(
               options.stream.getVideoTracks()[0]
             );
@@ -191,7 +191,7 @@ function VideoComponent() {
             const url = URL.createObjectURL(blob);
 
             dispatchImage({ type: "SET_URL", url: url });
-            dispatchImage({ type: "LOADING_FALSE" });
+            // dispatchImage({ type: "LOADING_FALSE" });
           }}
           style={
             {
