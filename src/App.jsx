@@ -1,4 +1,4 @@
-import { useRef, useEffect, useReducer } from "react";
+import { useRef, useState, useEffect, useReducer } from "react";
 import { IconRotateClockwise, IconChevronLeft } from "@tabler/icons-react";
 import { MantineProvider, ActionIcon, Button } from "@mantine/core";
 
@@ -72,6 +72,8 @@ function imageReducer(state, action) {
 
 function VideoComponent() {
   const videoRef = useRef(null);
+
+  const [url, setURL] = useState("");
 
   const [imageOptions, dispatchImage] = useReducer(imageReducer, {
     loading: false,
@@ -149,7 +151,7 @@ function VideoComponent() {
           onClick={handleCameraChange}
         />
       )}
-      {imageOptions.shouldShow && imageOptions.url.length && (
+      {url.length && (
         <img
           src={imageOptions.url}
           style={{ width: 364, height: 364, objectFit: "cover" }}
@@ -171,7 +173,7 @@ function VideoComponent() {
             dispatchImage({ type: "SHOW_IMAGE" });
           }}
         >
-          {imageOptions.url.length ? (
+          {url.length > 0 ? (
             <img
               src={imageOptions.url}
               style={{ width: 80, height: 80, objectFit: "cover" }}
@@ -189,6 +191,9 @@ function VideoComponent() {
             const blob = await imageCapture.takePhoto();
 
             const url = URL.createObjectURL(blob);
+            console.log(url);
+
+            setURL(url);
 
             dispatchImage({ type: "SET_URL", url: url });
             // dispatchImage({ type: "LOADING_FALSE" });
@@ -215,6 +220,7 @@ function VideoComponent() {
           <IconRotateClockwise />
         </ActionIcon>
       </div>
+      <p style={{ background: "white" }}>{url}</p>
     </div>
   );
 }
