@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useReducer } from "react";
+import { useRef, useLayoutEffect, useReducer } from "react";
 import { IconRotateClockwise, IconChevronLeft } from "@tabler/icons-react";
 import { MantineProvider, ActionIcon, Button } from "@mantine/core";
 
@@ -72,8 +72,7 @@ function imageReducer(state, action) {
 
 function VideoComponent() {
   const videoRef = useRef(null);
-
-  const [url, setURL] = useState("");
+  const canvasRef = useRef(null);
 
   const [imageOptions, dispatchImage] = useReducer(imageReducer, {
     loading: false,
@@ -95,7 +94,7 @@ function VideoComponent() {
     dispatch({ type: "TOGGLE_FACING_MODE" });
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = videoRef.current;
     video.setAttribute("autoplay", "");
     video.setAttribute("muted", "");
@@ -125,7 +124,6 @@ function VideoComponent() {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
         justifyContent: "space-evenly",
       }}
     >
@@ -135,7 +133,9 @@ function VideoComponent() {
           size="sm"
           color="rgba(255, 255, 255, 1)"
           aria-label="back"
-          onClick={() => dispatchImage({ type: "NO_SHOW_IMAGE" })}
+          onClick={() => {
+            dispatchImage({ type: "NO_SHOW_IMAGE" });
+          }}
         >
           <IconChevronLeft />
         </ActionIcon>
@@ -151,12 +151,14 @@ function VideoComponent() {
           onClick={handleCameraChange}
         />
       )}
-      {url.length && (
-        <img
-          src={imageOptions.url}
-          style={{ width: 364, height: 364, objectFit: "cover" }}
-        />
-      )}
+      <canvas
+        style={{
+          display: imageOptions.shouldShow ? "block" : "none",
+          // width: imageOptions.shouldShow ? 364 : 0,
+          // height: imageOptions.shouldShow ? 364 : 0,
+        }}
+        ref={canvasRef}
+      ></canvas>
       <div
         style={{
           display: "flex",
@@ -173,7 +175,7 @@ function VideoComponent() {
             dispatchImage({ type: "SHOW_IMAGE" });
           }}
         >
-          {url.length > 0 ? (
+          {imageOptions.url.length ? (
             <img
               src={imageOptions.url}
               style={{ width: 80, height: 80, objectFit: "cover" }}
@@ -185,31 +187,27 @@ function VideoComponent() {
           disabled={imageOptions.loading}
           onClick={async () => {
             // dispatchImage({ type: "LOADING_TRUE" });
-            const imageCapture = new ImageCapture(
-              options.stream.getVideoTracks()[0]
-            );
-            const blob = await imageCapture.takePhoto();
 
-            const url = URL.createObjectURL(blob);
-            console.log(url);
+            const { videoWidth, videoHeight } = videoRef.current;
 
-            setURL(url);
+            const context = canvasRef.current.getContext("2d");
+            // canvasRef.current.style.imagesRatio = 9 / 16;
+            canvasRef.current.style.minWidth = videoWidth;
+            canvasRef.current.style.minHeight = videoHeight;
 
-            dispatchImage({ type: "SET_URL", url: url });
+            context.drawImage(videoRef.current, 0, 0, 364, 364);
+
+            dispatchImage({ type: "SHOW_IMAGE" });
             // dispatchImage({ type: "LOADING_FALSE" });
           }}
-          style={
-            {
-              // width: 80,
-              // height: 80,
-              // background: "#FFF",
-              // borderRadius: "100%",
-              // margin: "auto",
-            }
-          }
-        >
-          Take
-        </Button>
+          style={{
+            width: 80,
+            height: 80,
+            background: "#FFF",
+            borderRadius: "100%",
+            margin: "auto",
+          }}
+        />
         <ActionIcon
           style={{ width: 80, height: 80 }}
           variant="outline"
@@ -220,7 +218,6 @@ function VideoComponent() {
           <IconRotateClockwise />
         </ActionIcon>
       </div>
-      <p style={{ background: "white" }}>{url}</p>
     </div>
   );
 }
