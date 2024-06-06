@@ -15,6 +15,8 @@ import { MantineProvider, ActionIcon, Button } from "@mantine/core";
 import "@mantine/core/styles.css";
 import "./App.css";
 
+const OBJECT_FIT = "cover";
+
 function reducer(state, action) {
   if (action.type === "TOGGLE_FACING_MODE") {
     if (state.constraints.video.facingMode === "user") {
@@ -114,7 +116,7 @@ function VideoComponent() {
     video.setAttribute("playsinline", "");
     video.style.height = "478px";
     video.style.width = "100%";
-    video.style.objectFit = "contain";
+    video.style.objectFit = OBJECT_FIT;
 
     navigator.mediaDevices
       .getUserMedia(options.constraints)
@@ -180,18 +182,13 @@ function VideoComponent() {
           style={{
             width: "100%",
             height: "478px",
-            background: "gray",
-            objectFit: "contain",
+            objectFit: OBJECT_FIT,
           }}
           src={src}
         />
       )}
       {!options.shouldShow && (
-        <video
-          ref={videoRef}
-          style={{ background: "lightgray" }}
-          onClick={handleCameraChange}
-        />
+        <video ref={videoRef} onClick={handleCameraChange} />
       )}
       <canvas
         style={{
@@ -225,7 +222,7 @@ function VideoComponent() {
           {src.length ? (
             <img
               src={src}
-              style={{ height: 80, width: 80, objectFit: "contain" }}
+              style={{ height: 80, width: 80, objectFit: OBJECT_FIT }}
             />
           ) : null}
         </ActionIcon>
