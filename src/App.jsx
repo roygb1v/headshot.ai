@@ -98,7 +98,6 @@ function VideoComponent() {
   };
 
   useEffect(() => {
-    console.log("timer", timer);
     if (timer < 0) {
       clearInterval(clearIntervalId);
       setTimer(3);
@@ -106,6 +105,9 @@ function VideoComponent() {
   }, [timer, clearIntervalId]);
 
   useLayoutEffect(() => {
+    if (options.shouldShow) {
+      return;
+    }
     const video = videoRef.current;
     video.setAttribute("autoplay", "");
     video.setAttribute("muted", "");
@@ -161,6 +163,7 @@ function VideoComponent() {
       </ActionIcon>
       {options.shouldShow && (
         <ActionIcon
+          style={{ position: "absolute", top: "14px" }}
           variant="transparent"
           size="sm"
           color="rgba(255, 255, 255, 1)"
@@ -171,6 +174,17 @@ function VideoComponent() {
         >
           <IconChevronLeft />
         </ActionIcon>
+      )}
+      {options.shouldShow && (
+        <img
+          style={{
+            width: "100%",
+            height: "478px",
+            background: "gray",
+            objectFit: "cover",
+          }}
+          src={src}
+        />
       )}
       {!options.shouldShow && (
         <video
@@ -195,7 +209,7 @@ function VideoComponent() {
           display: "flex",
           justifyContent: "space-between",
           width: window.innerWidth,
-          margin: "auto",
+          marginTop: "16px",
         }}
       >
         <ActionIcon
@@ -205,7 +219,7 @@ function VideoComponent() {
           color="rgba(255, 255, 255, 1)"
           aria-label="toggle"
           onClick={() => {
-            // dispatch({ type: "SHOW_IMAGE" });
+            dispatch({ type: "SHOW_IMAGE" });
           }}
         >
           {src.length ? (
