@@ -114,7 +114,7 @@ function VideoComponent() {
     video.setAttribute("playsinline", "");
     video.style.height = "478px";
     video.style.width = "100%";
-    video.style.objectFit = "cover";
+    video.style.objectFit = "contain";
 
     navigator.mediaDevices
       .getUserMedia(options.constraints)
@@ -181,7 +181,7 @@ function VideoComponent() {
             width: "100%",
             height: "478px",
             background: "gray",
-            objectFit: "cover",
+            objectFit: "contain",
           }}
           src={src}
         />
@@ -225,7 +225,7 @@ function VideoComponent() {
           {src.length ? (
             <img
               src={src}
-              style={{ height: 80, width: 80, objectFit: "cover" }}
+              style={{ height: 80, width: 80, objectFit: "contain" }}
             />
           ) : null}
         </ActionIcon>
